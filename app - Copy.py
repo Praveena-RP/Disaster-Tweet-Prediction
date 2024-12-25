@@ -1,16 +1,29 @@
 import streamlit as st
 import pickle
+import requests
+from io import BytesIO
 from sklearn.feature_extraction.text import TfidfVectorizer
 
-# Load the saved GridSearchCV model and TF-IDF vectorizer from pickle files
-model_path = 'D:/Disaster_mp1/svm_model.pkl'
-vectorizer_path = 'D:/Disaster_mp1/tfidf_vectorizer.pkl'
+# Function to download a file from a URL
+def download_file(url):
+    response = requests.get(url)
+    response.raise_for_status()  # Check if the request was successful
+    return BytesIO(response.content)
 
-with open(model_path, 'rb') as model_file:
-    grid_search_model = pickle.load(model_file)
+# URLs of the raw pickle files
+model_url = 'https://github.com/Praveena-RP/Disaster-Tweet-Prediction/raw/main/svm_model.pkl'
+vectorizer_url = 'https://github.com/Praveena-RP/Disaster-Tweet-Prediction/raw/main/tfidf_vectorizer.pkl'
 
-with open(vectorizer_path, 'rb') as vectorizer_file:
-    loaded_vectorizer = pickle.load(vectorizer_file)
+# Download the model and vectorizer files
+model_file = download_file(model_url)
+vectorizer_file = download_file(vectorizer_url)
+
+# Load the saved GridSearchCV model and TF-IDF vectorizer from the downloaded files
+with model_file as f:
+    grid_search_model = pickle.load(f)
+
+with vectorizer_file as f:
+    loaded_vectorizer = pickle.load(f)
 
 # Extract the best model (SVM) from the GridSearchCV object
 svm_model = grid_search_model.best_estimator_
